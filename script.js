@@ -3,8 +3,9 @@ const money_plus = document.getElementById('money-plus');
 const money_minus = document.getElementById('money-minus');
 const list = document.getElementById('list');
 const form = document.getElementById('form');
-const text = document.getElementById('text');
-const amount = document.getElementById('amount');
+//const text = document.getElementById('text');
+//const amount = document.getElementById('amount');
+const users = document.getElementById('users');
 
 // const dummyTransactions = [
 //   { id: 1, text: 'Flower', amount: -20 },
@@ -13,6 +14,62 @@ const amount = document.getElementById('amount');
 //   { id: 4, text: 'Camera', amount: 150 }
 // ];
 
+const userAccounts = [
+  { id: '1', name:'Alex', accounts: [
+    { bank:'DBS', deposit:25, loan:10 },
+    { bank:'Citi', deposit:0, loan:5 },
+    { bank:'HSBC', deposit:30, loan:0 }
+  ]},
+  { id: '2', name:'Mila', accounts: [
+    { bank:'DBS', deposit:100, loan:0 },
+    { bank:'UOB', deposit:5, loan:40 }
+  ]}
+];
+
+function updateUserInfo(userInfo) {
+  if(!userInfo)
+  {
+    console.log("WARNING: Undefined userInfo");
+    return;
+  }
+  let listHTML = '';
+  let deposit = 0, loan = 0, total = 0;
+  userInfo.accounts.forEach((account) => {
+    if(account.deposit !== 0) {
+      deposit += account.deposit;
+      listHTML += '<li class="plus">' + account.bank + '<span>+' + account.deposit + '</span></li>';
+    }
+    if(account.loan !== 0) {
+      loan += account.loan;
+      listHTML += '<li class="minus">' + account.bank + '<span>-' + account.loan + '</span></li>';
+    }
+  });
+  deposit = deposit.toFixed(2);
+  loan = loan.toFixed(2);
+  total = deposit - loan;
+  total = total.toFixed(2);
+
+  balance.innerText = `$${total}`;
+  money_plus.innerText = `$${deposit}`;
+  money_minus.innerText = `$${loan}`;
+  list.innerHTML = listHTML;
+}
+
+function selectUser() {
+  updateUserInfo(userAccounts.find((elem) => { return users.value === elem.id; }));
+}
+
+function init() {
+  userAccounts.forEach((userInfo) => {
+      users.innerHTML += `<option value="${userInfo.id}">${userInfo.name}</option>`;
+  });
+  selectUser();
+}
+
+init();
+users.addEventListener('change', selectUser)
+
+/*
 const localStorageTransactions = JSON.parse(
   localStorage.getItem('transactions')
 );
@@ -107,7 +164,6 @@ function updateLocalStorage() {
   localStorage.setItem('transactions', JSON.stringify(transactions));
 }
 
-// Init app
 function init() {
   list.innerHTML = '';
 
@@ -116,5 +172,7 @@ function init() {
 }
 
 init();
-
 form.addEventListener('submit', addTransaction);
+*/
+
+
