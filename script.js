@@ -1,18 +1,8 @@
 const balance = document.getElementById('balance');
-const money_plus = document.getElementById('money-plus');
-const money_minus = document.getElementById('money-minus');
 const list = document.getElementById('list');
 const form = document.getElementById('form');
-//const text = document.getElementById('text');
-//const amount = document.getElementById('amount');
 const users = document.getElementById('users');
-
-// const dummyTransactions = [
-//   { id: 1, text: 'Flower', amount: -20 },
-//   { id: 2, text: 'Salary', amount: 300 },
-//   { id: 3, text: 'Book', amount: -10 },
-//   { id: 4, text: 'Camera', amount: 150 }
-// ];
+const balanceChart = document.getElementById('balance-chart');
 
 const userAccounts = [
   { id: '1', name:'Alex', accounts: [
@@ -50,13 +40,99 @@ function updateUserInfo(userInfo) {
   total = total.toFixed(2);
 
   balance.innerText = `$${total}`;
-  money_plus.innerText = `$${deposit}`;
-  money_minus.innerText = `$${loan}`;
+  drawBalanceChart(deposit, loan);
   list.innerHTML = listHTML;
 }
 
 function selectUser() {
   updateUserInfo(userAccounts.find((elem) => { return users.value === elem.id; }));
+}
+
+function drawBalanceChart(deposit, loan) {
+  const height = 200, width = 350, xmargin = 40, textSpacing = 20;
+
+  balanceChart.innerHTML = '';
+  deposit = parseFloat(deposit);
+  loan = parseFloat(loan);
+
+  let svg = d3.select("#balance-chart")
+    .append('svg')
+    .attr("width", width)
+    .attr("height", height);
+
+  if(deposit || loan)
+  {
+    let dh, lh;
+    if(deposit > loan)
+    {
+      dh = height;
+      lh = loan * height / deposit;
+    }
+    else
+    {
+      lh = height;
+      dh = deposit * height / loan;
+    }
+
+    const bars = [
+      {
+        x: 1.5 * xmargin,
+        y: height - dh,
+        height: dh,
+        width: width / 2 - 2 * xmargin,
+        collor: "#2ecc71"
+      },
+      {
+        x: width / 2 + 0.5 * xmargin,
+        y: height - lh,
+        height: lh,
+        width: width / 2 - 2 * xmargin,
+        collor: "#c0392b"
+      }
+    ];
+
+    svg.selectAll("rect")
+      .data(bars)
+      .enter().append("rect")
+      .attr("x", bar => bar.x)
+      .attr("y", bar => bar.y )
+      .attr("fill", bar => bar.collor)
+      .attr("height", bar => bar.height + "px")
+      .attr("width", bar => bar.width);
+  }
+
+  const labels = [
+    {
+      x: width/4 + 0.5 * xmargin,
+      y: height - textSpacing * 2,
+      text: "DEPOSIT"
+    },
+    {
+      x: width/4 + 0.5 * xmargin,
+      y: height - textSpacing,
+      text: "$" + deposit
+    },
+    {
+      x: 3 * width / 4 - 0.5 * xmargin,
+      y: height - textSpacing * 2,
+      text: "LOAN"
+    },
+    {
+      x: 3 * width / 4 - 0.5 * xmargin,
+      y: height - textSpacing,
+      text: "$" + loan
+    }
+  ];
+
+
+  svg.selectAll("text")
+    .data(labels)
+    .enter().append("text")
+    .attr("x", label => label.x)
+    .attr("y", label => label.y)
+    .attr("fill", "black")
+    .attr("text-anchor", "middle")
+    .text(label => label.text);
 }
 
 function init() {
@@ -68,111 +144,5 @@ function init() {
 
 init();
 users.addEventListener('change', selectUser)
-
-/*
-const localStorageTransactions = JSON.parse(
-  localStorage.getItem('transactions')
-);
-
-let transactions =
-  localStorage.getItem('transactions') !== null ? localStorageTransactions : [];
-
-// Add transaction
-function addTransaction(e) {
-  e.preventDefault();
-
-  if (text.value.trim() === '' || amount.value.trim() === '') {
-    alert('Please add a text and amount');
-  } else {
-    const transaction = {
-      id: generateID(),
-      text: text.value,
-      amount: +amount.value
-    };
-
-    transactions.push(transaction);
-
-    addTransactionDOM(transaction);
-
-    updateValues();
-
-    updateLocalStorage();
-
-    text.value = '';
-    amount.value = '';
-  }
-}
-
-// Generate random ID
-function generateID() {
-  return Math.floor(Math.random() * 100000000);
-}
-
-// Add transactions to DOM list
-function addTransactionDOM(transaction) {
-  // Get sign
-  const sign = transaction.amount < 0 ? '-' : '+';
-
-  const item = document.createElement('li');
-
-  // Add class based on value
-  item.classList.add(transaction.amount < 0 ? 'minus' : 'plus');
-
-  item.innerHTML = `
-    ${transaction.text} <span>${sign}${Math.abs(
-    transaction.amount
-  )}</span> <button class="delete-btn" onclick="removeTransaction(${
-    transaction.id
-  })">x</button>
-  `;
-
-  list.appendChild(item);
-}
-
-// Update the balance, income and expense
-function updateValues() {
-  const amounts = transactions.map(transaction => transaction.amount);
-
-  const total = amounts.reduce((acc, item) => (acc += item), 0).toFixed(2);
-
-  const income = amounts
-    .filter(item => item > 0)
-    .reduce((acc, item) => (acc += item), 0)
-    .toFixed(2);
-
-  const expense = (
-    amounts.filter(item => item < 0).reduce((acc, item) => (acc += item), 0) *
-    -1
-  ).toFixed(2);
-
-  balance.innerText = `$${total}`;
-  money_plus.innerText = `$${income}`;
-  money_minus.innerText = `$${expense}`;
-}
-
-// Remove transaction by ID
-function removeTransaction(id) {
-  transactions = transactions.filter(transaction => transaction.id !== id);
-
-  updateLocalStorage();
-
-  init();
-}
-
-// Update local storage transactions
-function updateLocalStorage() {
-  localStorage.setItem('transactions', JSON.stringify(transactions));
-}
-
-function init() {
-  list.innerHTML = '';
-
-  transactions.forEach(addTransactionDOM);
-  updateValues();
-}
-
-init();
-form.addEventListener('submit', addTransaction);
-*/
 
 
