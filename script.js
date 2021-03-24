@@ -13,6 +13,12 @@ const userAccounts = [
   { id: '2', name:'Mila', accounts: [
     { bank:'DBS', deposit:100, loan:0 },
     { bank:'UOB', deposit:5, loan:40 }
+  ]},
+  { id: '3', name:'Luke', accounts: [
+    { bank:'DBS', deposit:0, loan:80 },
+    { bank:'ICBC', deposit:20, loan:55 },
+    { bank:'Maybank', deposit:110, loan:80 },
+    { bank:'SCB', deposit:10, loan:20 },
   ]}
 ];
 
