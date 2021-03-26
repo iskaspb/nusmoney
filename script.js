@@ -4,7 +4,7 @@ const form = document.getElementById('form');
 const users = document.getElementById('users');
 const balanceChart = document.getElementById('balance-chart');
 
-const userAccounts = [
+var userAccounts = [
   { id: '1', name:'Alex', accounts: [
     { bank:'DBS', deposit:25, loan:10 },
     { bank:'Citi', deposit:0, loan:5 },
@@ -148,7 +148,38 @@ function init() {
   selectUser();
 }
 
-init();
+function loadRemoteData(){
+  fetch('https://16a24f08-003b-44fc-9fb9-e82a73569685.mock.pstmn.io/accounts')
+    .then(
+      function(response) {
+        if (response.status !== 200) {
+          console.log('Looks like there was a problem. Status Code: ' +
+            response.status);
+          return;
+        }
+
+        // Examine the text in the response
+        response.json().then(function(data) {
+          console.log(data);
+          userAccounts = data;
+          init();
+        });
+      }
+    )
+    .catch(function(err) {
+      console.log('Fetch Error :-S', err);
+    });
+}
+
+const isRemoteData = true;
+
+if(isRemoteData) {
+  loadRemoteData();
+}
+else {
+  init();
+}
+
 users.addEventListener('change', selectUser)
 
 
