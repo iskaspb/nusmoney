@@ -161,7 +161,7 @@ function loadRemoteData(){
         // Examine the text in the response
         response.json().then(function(data) {
           console.log(data);
-          userAccounts = data;
+          userAccounts = [...data];
           init();
         });
       }
